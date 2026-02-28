@@ -106,8 +106,8 @@ class PolymarketFetcher:
             params["category"] = category
 
         try:
-            async with session.get(f"{GAMMA_BASE}/markets", params=params) as resp:
-                data = await resp.json()
+            async with session.get(f"{GAMMA_BASE}/markets", params=params, headers={"Accept": "application/json"}) as resp:
+                data = await resp.json(content_type=None)
 
             markets = []
             for m in data:

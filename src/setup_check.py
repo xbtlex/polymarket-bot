@@ -111,10 +111,11 @@ async def check_all():
         async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as s:
             async with s.get(
                 "https://gamma-api.polymarket.com/markets",
-                params={"limit": 3, "active": "true"},
+                params={"limit": 3, "closed": "false"},
+                headers={"Accept": "application/json"},
                 timeout=aiohttp.ClientTimeout(total=10)
             ) as resp:
-                data = await resp.json()
+                data = await resp.json(content_type=None)
                 if isinstance(data, list) and len(data) > 0:
                     print(f"   {PASS} Gamma API: {len(data)} markets fetched")
                     # Check token IDs
