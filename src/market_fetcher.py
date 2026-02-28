@@ -13,6 +13,8 @@ No API key required for read-only access.
 
 import aiohttp
 import asyncio
+import ssl
+import certifi
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional, Dict, Any
@@ -20,6 +22,9 @@ from loguru import logger
 
 GAMMA_BASE = "https://gamma-api.polymarket.com"
 CLOB_BASE  = "https://clob.polymarket.com"
+
+# SSL context using certifi — fixes Windows hostname mismatch errors
+SSL_CONTEXT = ssl.create_default_context(cafile=certifi.where())
 
 
 @dataclass
@@ -74,8 +79,10 @@ class PolymarketFetcher:
 
     async def _get_session(self) -> aiohttp.ClientSession:
         if not self.session or self.session.closed:
+            connector = aiohttp.TCPConnector(ssl=SSL_CONTEXT)
             self.session = aiohttp.ClientSession(
-                timeout=aiohttp.ClientTimeout(total=30)
+                timeout=aiohttp.ClientTimeout(total=30),
+                connector=connector,
             )
         return self.session
 

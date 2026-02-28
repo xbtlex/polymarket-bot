@@ -108,7 +108,9 @@ async def check_all():
     print("4. Polymarket API")
     try:
         import aiohttp
-        async with aiohttp.ClientSession() as s:
+        import ssl, certifi
+        _ssl = ssl.create_default_context(cafile=certifi.where())
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=_ssl)) as s:
             async with s.get(
                 "https://gamma-api.polymarket.com/markets",
                 params={"limit": 3, "active": "true"},
