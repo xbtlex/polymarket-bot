@@ -37,6 +37,10 @@ class PolymarketMarket:
     resolved: bool
     outcome: Optional[str]     # "YES" / "NO" if resolved
 
+    # CLOB token IDs — required for live order execution
+    yes_token_id: str = ""     # Token ID for YES shares on CLOB
+    no_token_id: str  = ""     # Token ID for NO shares on CLOB
+
     # Derived
     implied_prob: float = 0.0  # Market's implied probability of YES
     spread: float = 0.0        # YES + NO - 1.0 (market maker take)
@@ -130,6 +134,8 @@ class PolymarketFetcher:
                         end_date=end_date,
                         resolved=m.get("closed", False),
                         outcome=m.get("resolution"),
+                        yes_token_id=yes_token.get("token_id", "") if yes_token else "",
+                        no_token_id=no_token.get("token_id", "")  if no_token  else "",
                     ))
                 except Exception as e:
                     logger.debug(f"Error parsing market: {e}")

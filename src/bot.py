@@ -260,15 +260,21 @@ class PolymarketBot:
         m     = opp.market
         price = m.yes_price if side == "YES" else m.no_price
 
-        # Get token ID for the side we want
-        # This requires the full market data with token IDs
-        # For now we use the market_id — in production get the specific token_id
-        token_id = m.market_id  # Simplified — real impl needs YES/NO token IDs
+        # Get the correct CLOB token ID for this side
+        token_id = m.yes_token_id if side == "YES" else m.no_token_id
+        if not token_id:
+            logger.error(f"No {side} token ID for market {m.market_id} — cannot execute")
+            await self.alerter.send(f"⚠️ Missing token ID for {side} on:\n{m.question[:80]}\nSkipping.")
+            return False
 
-        if side == "YES":
-            result = await self.executor.buy_yes(token_id, size_usd, price)
-        else:
-            result = await self.executor.buy_no(token_id, size_usd, price)
+        result = await self.executor.execute_bet(
+            token_id=token_id,
+            side=side,
+            size_usd=size_usd,
+            expected_price=price,
+            max_slippage=0.03,
+            fill_timeout=30,
+        )
 
         if result.success:
             # Log to tracker
