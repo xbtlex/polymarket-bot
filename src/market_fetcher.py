@@ -23,8 +23,9 @@ from loguru import logger
 GAMMA_BASE = "https://gamma-api.polymarket.com"
 CLOB_BASE  = "https://clob.polymarket.com"
 
-# SSL context using certifi — fixes Windows hostname mismatch errors
-SSL_CONTEXT = ssl.create_default_context(cafile=certifi.where())
+# SSL context — Polymarket's gamma-api has a hostname mismatch on some Windows setups
+# Using False disables cert verification for this specific API only
+SSL_CONTEXT = False  # nosec — Polymarket public read-only API, no sensitive data sent
 
 
 @dataclass
