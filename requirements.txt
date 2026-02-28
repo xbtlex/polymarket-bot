@@ -2,3 +2,7 @@ aiohttp>=3.9.0
 loguru>=0.7.0
 scipy>=1.11.0
 pandas>=2.0.0
+python-dotenv>=1.0.0
+# For live trading:
+# py-clob-client>=0.18.0
+# web3>=6.0.0
