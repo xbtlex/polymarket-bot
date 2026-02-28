@@ -70,8 +70,8 @@ class PolymarketScanner:
                 end_date=market.end_date,
             )
 
-            # Skip if low confidence
-            if estimate.confidence < 0.40:
+            # Skip if very low confidence (no edge detected)
+            if estimate.confidence < 0.25:
                 continue
 
             # Calculate EV and Kelly

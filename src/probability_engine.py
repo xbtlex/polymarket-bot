@@ -117,44 +117,50 @@ class ProbabilityEngine:
         """Estimate macro/Fed markets."""
         question_lower = question.lower()
 
-        # Fed rate cut markets
+        # ── Fed rate markets (Feb 2026 context) ─────────────────────────────
+        # Fed held rates at 4.25-4.50% through late 2025 / early 2026.
+        # Sticky services inflation, strong labor market. Market pricing
+        # ~1-2 cuts for full year 2026. Tariff uncertainty adds upside inflation risk.
         if "rate cut" in question_lower or "cut rates" in question_lower:
-            # Current macro: Fed holding, sticky inflation, hawkish bias
-            # Market consensus: no cuts in near term
-            base_prob = 0.15  # Low probability of cut given current data
+            # Check time frame in question
+            urgent = any(w in question_lower for w in ["march", "may", "june", "q1", "q2"])
+            base_prob = 0.12 if urgent else 0.35
+            reasoning = (
+                "Fed at 4.25-4.50%, inflation still above target. "
+                + ("Near-term cut very unlikely — FOMC needs multiple soft CPI prints." if urgent
+                   else "1-2 cuts possible in 2026 H2 if inflation cooperates.")
+            )
             return ProbabilityEstimate(
                 our_probability=base_prob,
-                confidence=0.65,
+                confidence=0.68,
                 method="macro model",
-                reasoning="Fed hawkish, sticky inflation, no cuts likely near term. Fed funds futures pricing minimal cuts."
+                reasoning=reasoning,
             )
 
         if "rate hike" in question_lower or "hike" in question_lower:
-            base_prob = 0.05  # Extremely unlikely to hike
             return ProbabilityEstimate(
-                our_probability=base_prob,
-                confidence=0.75,
+                our_probability=0.04,
+                confidence=0.80,
                 method="macro model",
-                reasoning="Fed hiking cycle over. Hike probability near zero given current data."
+                reasoning="Hiking cycle over. Hike probability near zero — tariffs are inflationary but Fed won't hike into slowdown.",
             )
 
         if "recession" in question_lower:
-            base_prob = 0.30  # Meaningful recession risk
+            # Tariff risks + slowing growth but no recession yet
+            base_prob = 0.28
             return ProbabilityEstimate(
                 our_probability=base_prob,
-                confidence=0.50,
+                confidence=0.48,
                 method="macro model",
-                reasoning="Yield curve recently re-steepened after inversion — historically elevated recession risk 6-18 months out."
+                reasoning="Yield curve re-steepening after inversion. Tariff drag on growth. 6-18mo recession risk elevated but not base case.",
             )
 
         if "cpi" in question_lower and ("above" in question_lower or "below" in question_lower or "beat" in question_lower):
-            # CPI surprise markets — roughly coin flip but Fed-watchers have edge
-            base_prob = 0.45  # Slight lean toward miss given sticky inflation
             return ProbabilityEstimate(
-                our_probability=base_prob,
-                confidence=0.45,
+                our_probability=0.48,
+                confidence=0.42,
                 method="macro model",
-                reasoning="CPI markets are near coin-flip. Slight miss bias given sticky services inflation."
+                reasoning="CPI markets near coin-flip. Slight upside surprise bias given tariff pass-through and sticky services.",
             )
 
         return self._estimate_base_rate(question, yes_price, end_date)
